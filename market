@@ -1,0 +1,97 @@
+import os
+
+# 상품을 저장할 딕셔너리
+product = {}
+
+# Mart 클래스
+class Mart:
+    def __init__(self, price, amount):
+        self.price = float(price)
+        self.amount = int(amount)
+
+    # 상품 수량 추가 메서드
+    def add_amount(self, quantity):
+        self.amount += int(quantity)
+        return self.amount
+
+# 파일에서 상품 목록을 로드 (파일이 없으면 새로 생성)
+if not os.path.exists('product.txt'):
+    with open('product.txt', 'w', encoding='utf-8') as f:
+        pass  # 빈 파일 생성
+
+with open('product.txt', 'r', encoding='utf-8') as f:
+    lines = f.readlines()
+    for line in lines:
+        parts = line.strip().split(',')
+        if len(parts) == 3:
+            name = parts[0]
+            price = float(parts[1])
+            amount = int(parts[2])
+            product[name] = Mart(price, amount)
+
+# 새 상품 추가 함수
+def add_product():
+    name_of_product = input('상품명 입력 >>> ')
+    price_of_product = float(input('상품 가격 입력 >>> '))
+    amount_of_product = int(input('상품 수량 입력 >>> '))
+
+    product[name_of_product] = Mart(price_of_product, amount_of_product)
+    print(f"[{name_of_product}] 상품이 등록되었습니다.")
+
+# 메인 프로그램 루프
+print('—' * 40)
+print('가게 재고 관리 프로그램이 시작되었습니다.')
+print('명령어 종류: [add, save, add_quant, check, reset, exit]')
+print('—' * 40)
+
+while True:
+    input_content = input('\n무엇을 할 것인가? >>> ').strip()
+    
+    # 새 상품 추가
+    if input_content == 'add':
+        add_product()
+        
+    # 파일에 저장
+    elif input_content == 'save':
+        with open('product.txt', 'w', encoding='utf-8') as f:
+            for name, item in product.items():
+                f.write(f"{name},{item.price},{item.amount}\n")
+        print('데이터가 product.txt에 저장되었습니다.')
+        
+    # 상품의 수량 추가
+    elif input_content == 'add_quant':
+        a = input('어떤 상품의 수량을 추가할 것인가? >>> ')
+        if a in product:
+            quant = input('추가할 수량 입력 >>> ')
+            new_amount = product[a].add_amount(quant)
+            print(f"{a}의 현재 재고: {new_amount}개")
+        else:
+            print("존재하지 않는 상품입니다.")
+            
+    # 현재 재고 목록 확인
+    elif input_content == 'check':
+        if product:
+            print("\n=== 현재 재고 목록 ===")
+            for name, item in product.items():
+                print(f"상품: {name} | 가격: {item.price}원 | 수량: {item.amount}개")
+            print("=====================")
+        else:
+            print("등록된 상품이 없습니다.")
+            
+    # 재고 데이터 초기화
+    elif input_content == 'reset':
+        confirm = input("정말 모든 데이터를 삭제하시겠습니까? (y/n) >>> ")
+        if confirm.lower() == 'y':
+            product.clear()
+            with open('product.txt', 'w', encoding='utf-8') as f:
+                f.write("")
+            print("모든 재고 데이터가 초기화되었습니다.")
+            
+    # 프로그램 종료
+    elif input_content == 'exit':
+        print("프로그램을 종료합니다.")
+        break
+        
+    # 알 수 없는 명령어
+    else:
+        print("알 수 없는 명령어입니다. 다시 입력해주세요.")
